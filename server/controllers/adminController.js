@@ -6,7 +6,7 @@ const User = require("../models/userModel.js")
 const loginAdmin = async (req, res) =>{
 	try{
 		const {email, password } = req.body;
-		const admin = await Admin.findOne({email});
+		const admin = await User.findOne({email});
 
 		const isPasswordCorrect = await bcrypt.compare(password,admin?.password || "");
 		if(!admin || !isPasswordCorrect ) return res.status(400).json({error:"Invalid email or Password"});
@@ -29,6 +29,7 @@ const loginAdmin = async (req, res) =>{
 		console.log("Error in loginadmin:",error.message);
 	}
  }
+
  const createUser = async(req,res)=>{
     try {
       
@@ -84,9 +85,20 @@ try {
 		console.log("Error in updating admin: ", error.message);
 }
 }
+const logoutUser = async (req,res)=>{
+	try {
+		res.cookie("jwt","",{maxAge:1});
+		res.status(200).json({message:"User logged out"});
+
+	}catch(error){
+		res.status(500).json({ error: error.message });
+		console.log("Error in logoutUser: ", error.message);
+	}
+ }
 
 module.exports = {
     dashboard,
     loginAdmin,
     createUser,
+    logoutUser,
 }
