@@ -1,7 +1,9 @@
 const Admin = require("../models/adminModel.js")
+const { find } = require("../models/categoryModel.js")
 const User = require("../models/userModel.js")
  const generateTokenAndSetCookie = require("../utils/helper/generateToken.js")
  const bcrypt = require("bcryptjs")
+ const productModel = require("../models/productModel.js")
 
 const loginAdmin = async (req, res) =>{
 	try{
@@ -26,7 +28,7 @@ const loginAdmin = async (req, res) =>{
 
 	}catch(error){
 		res.status(500).json({error:error.message});
-		console.log("Error in loginadmin:",error.message);
+		console.error("Error in loginadmin:",error.message);
 	}
  }
 
@@ -75,15 +77,88 @@ const loginAdmin = async (req, res) =>{
     }
  }
 
+ const updateUser = async (req, res) => {
+    try {
+        const userId = req.params.userId; // Extract user ID from request parameters
+        const { name, username, role } = req.body; // Extract updated user details from request body
+
+        // Find the user by ID
+        let user = await User.findById(userId);
+
+        // If user does not exist, return a 404 error
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        // Update the user's details
+        user.name = name;
+        user.username = username;
+        user.role = role;
+
+        // Save the updated user object
+        const updatedUser = await user.save();
+
+        // Return the updated user details in the response
+        res.status(200).json({message:"User update successfully ",updatedUser});
+    } catch (error) {
+        console.error("Error updating user:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
+
+//  const setRoles = async(req,res)=>{
+//     try {
+//         const { userIds, role } = req.body;
+//         // const admin = req.user; // Assuming user information is stored in req.user
+
+//         // // Validate if user is an admin
+//         // if (!admin || admin.role !== 'admin') {
+//         //     return res.status(401).json({ error: "Unauthorized" });
+//         // }
+
+//         // Update roles for the specified user IDs
+//         const result = await User.updateMany(
+//             { _id: { $in: userIds } }, // Match users by their IDs
+//             { role } // Set the new role
+//         );
+
+//         console.log(`${result.nModified} users updated`);
+
+//         res.status(200).json({ message: `${result.nModified} users updated` });
+//     } catch (error) {
+//         res.status(400).json({ error: "Internal Server Error" });
+//     }
+//  }
+
+ const getUser = async (req, res) => {
+    try {
+        
+        const users = await User.find({ role: { $ne: 'admin' } });
+
+        res.status(200).json(users);
+    } catch (error) {
+        console.error("Error getting users:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
 
 const dashboard = async(req,res)=>{
-try {
-
-    res.status(200).json("hai dashboard")
-} catch (error) {
-    res.status(500).json({ error: error.message });
-		console.log("Error in updating admin: ", error.message);
-}
+    try {
+        const inventoryReport = await productModel.aggregate([
+            {
+                $group: {
+                    _id: '$category',
+                    totalQuantity: { $sum: '$quantity' },
+                    itemCount: { $sum: 1 },
+                },
+            },
+        ]);
+        res.json(inventoryReport);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
 }
 const logoutUser = async (req,res)=>{
 	try {
@@ -101,4 +176,6 @@ module.exports = {
     loginAdmin,
     createUser,
     logoutUser,
+    getUser,
+    updateUser,
 }

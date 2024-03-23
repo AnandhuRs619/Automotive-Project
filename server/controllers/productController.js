@@ -99,10 +99,10 @@ const addProduct = async (req, res) => {
         // const user = req.user; 
         // console.log(user)
 
-        // // Validate if user is an admin
-        // if (!user || user.role !== 'admin') {
-        //     return res.status(401).json({ error: "Unauthorized" });
-        // }
+        // Validate if user is an admin
+        if (!user || user.role !== 'admin') {
+            return res.status(401).json({ error: "Unauthorized" });
+        }
 
         // Delete the product
         await productModel.findByIdAndDelete(productId);
