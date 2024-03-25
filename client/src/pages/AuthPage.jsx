@@ -1,11 +1,10 @@
-
-import { Flex } from '@chakra-ui/react';
-import { LoginCard } from '../components/LoginCard';
+import { Box } from '@chakra-ui/react';
+import { LoginCard } from '../components/common/LoginCard';
 
 export const AuthPage = () => {
   return (
-    <Flex  align="center" justify="center" h="100vh">
+    <Box bgColor="white" h="100vh" display="flex" justifyContent="center" alignItems="center">
       <LoginCard />
-    </Flex>
+    </Box>
   );
-};   
+};

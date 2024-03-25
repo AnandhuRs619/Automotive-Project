@@ -137,6 +137,7 @@ const loginAdmin = async (req, res) =>{
         const users = await User.find({ role: { $ne: 'admin' } });
 
         res.status(200).json(users);
+        console.log(users)
     } catch (error) {
         console.error("Error getting users:", error);
         res.status(500).json({ error: "Internal Server Error" });

@@ -14,8 +14,8 @@ import {
 } from '@chakra-ui/react';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import { useSetRecoilState } from 'recoil';
-import useShowToast from '../hooks/useShowToast';
-import userAtom from '../atoms/userAtom';
+import useShowToast from '../../hooks/useShowToast';
+import userAtom from '../../atoms/userAtom';
 
 export const LoginCard = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -54,8 +54,8 @@ export const LoginCard = () => {
   };
 
   return (
-    <Flex align="center" justify="center" borderColor="red" borderWidth="3px">
-      <Stack spacing={8} mx="auto" maxW="lg" py={12} px={6}>
+    <Flex  align="center" justify="center" >
+      <Stack bgColor={useColorModeValue('white', 'gray.dark')} spacing={8} mx="auto" maxW="lg" py={12} px={6}>
         <Stack align="center">
           <Heading fontSize="4xl" textAlign="center">
             Login
