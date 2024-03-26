@@ -49,11 +49,11 @@ const addProduct = async (req, res) => {
     try {
       const productData = await productModel
         .find()
-        .populate('category');
+        .populate('category').populate('enteredBy');
   
       console.log(productData);
   
-      res.json({ status: 200, data: productData });
+      res.status(200).json( productData );
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }
@@ -99,10 +99,10 @@ const addProduct = async (req, res) => {
         // const user = req.user; 
         // console.log(user)
 
-        // Validate if user is an admin
-        if (!user || user.role !== 'admin') {
-            return res.status(401).json({ error: "Unauthorized" });
-        }
+        // // Validate if user is an admin
+        // if (!user || user.role !== 'admin') {
+        //     return res.status(401).json({ error: "Unauthorized" });
+        // }
 
         // Delete the product
         await productModel.findByIdAndDelete(productId);

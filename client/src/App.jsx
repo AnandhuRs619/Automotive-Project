@@ -6,6 +6,7 @@ import { AuthPage } from './pages/AuthPage';
 import { useRecoilValue } from 'recoil';
 import userAtom from './atoms/userAtom';
 import { UsersListPage } from './pages/UsersListPage';
+import { InventoryItemPage } from './pages/InventoryItemPage';
 
 function App() {
   const user = useRecoilValue(userAtom);
@@ -17,6 +18,7 @@ function App() {
           <Route path="/" element={!user ? <AuthPage /> : <Navigate to="/dashboard" />} />
           <Route path="/dashboard" element={user ? <DashboardPage /> : <Navigate to="/" />} />
           <Route path="/users" element= {user ?<UsersListPage/> : <Navigate to="/" />} />
+          <Route path="/inventory" element= {user ?<InventoryItemPage/> : <Navigate to="/" />} />
         </Routes>
     </Box>
      
