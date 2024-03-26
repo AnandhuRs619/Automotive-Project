@@ -8,13 +8,16 @@ import {
   AiOutlineUser,
   AiOutlineMenu,
 } from "react-icons/ai";
+import { useRecoilValue } from "recoil";
+import userAtom from "../../atoms/userAtom";
+
 
 export function SideMenu() {
   const location = useLocation();
   const [selectedKeys, setSelectedKeys] = useState("/dashboard");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const navigate = useNavigate(); // Use the navigate function from react-router-dom
-
+  const navigate = useNavigate(); 
+  const user = useRecoilValue(userAtom);
   useEffect(() => {
     const pathName = location.pathname;
     setSelectedKeys(pathName);
@@ -28,12 +31,6 @@ export function SideMenu() {
     navigate(key); // Navigate to the specified key
   };
 
-  // Sample admin details (replace with actual data)
-  const adminDetails = {
-    name: "John Doe",
-    role: "Administrator",
-    profilePic: "https://thumbs.dreamstime.com/b/default-avatar-profile-icon-vector-social-media-user-image-182145777.jpg",
-  };
 
   return (
     <Flex
@@ -52,13 +49,13 @@ export function SideMenu() {
       </Box>
       {/* Admin details section */}
       <Box mb={"25px"} p="4" bgColor={"whitesmoke"} alignItems="center" borderRadius={"5px"} display="flex">
-        <Avatar name={adminDetails.name} size="md" mr="2" />
+        <Avatar name={user.name} src={`http://localhost:5000/images/${user.profilePic[0]}`} size="md" mr="2" />
         <Flex direction="column">
           <Text fontSize="lg" fontWeight="bold" color="gray.700">
-            {adminDetails.name}
+            {user.name}
           </Text>
           <Text fontSize="sm" color="gray.500">
-            {adminDetails.role}
+            {user.role}
           </Text>
         </Flex>
         <IconButton

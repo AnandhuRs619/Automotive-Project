@@ -4,25 +4,27 @@ const User = require("../models/userModel.js")
  const generateTokenAndSetCookie = require("../utils/helper/generateToken.js")
  const bcrypt = require("bcryptjs")
  const productModel = require("../models/productModel.js")
+ const fs = require("fs");
+const path = require("path");
 
 const loginAdmin = async (req, res) =>{
 	try{
 		const {email, password } = req.body;
-		const admin = await User.findOne({email});
+		const user = await User.findOne({email});
 
-		const isPasswordCorrect = await bcrypt.compare(password,admin?.password || "");
-		if(!admin || !isPasswordCorrect ) return res.status(400).json({error:"Invalid email or Password"});
+		const isPasswordCorrect = await bcrypt.compare(password,user?.password || "");
+		if(!user || !isPasswordCorrect ) return res.status(400).json({error:"Invalid email or Password"});
 
 		
-		generateTokenAndSetCookie(admin._id,res);
+		generateTokenAndSetCookie(user._id,res);
 
 		res.status(200).json({
-			_id:admin._id,
-			name:admin.name,
-			email:admin.email,
-			adminname:admin.adminname,
-			profilePic:admin.profilePic,
-			
+			_id:user._id,
+			name:user.name,
+			email:user.email,
+			adminname:user.adminname,
+			profilePic:user.profilePic,
+			role:user.role
 		})
         console.log("login successfully")
 
@@ -35,26 +37,35 @@ const loginAdmin = async (req, res) =>{
  const createUser = async(req,res)=>{
     try {
       
-            const { name, email, username, password ,role } = req.body;
+            const { name, email, phone, password ,role } = req.body;
             console.log(req.body)
-            const user = await User.findOne({ $or: [{ email }, { username }] });
+            const user = await User.findOne({ $or: [{ email }, { name }] });
              
             if (user) {
                 return res.status(400).json({ error: "User already exists" });
             }
             const salt = await bcrypt.genSalt(10);
             const hashedPassword = await bcrypt.hash(password, salt);
+
+            const images = req.files;
+            console.log(images);
+            const imagePaths = [];
+
+            for (const image of images) {
+             imagePaths.push(image.filename);
+                 }
     
             const newUser = new User({
                 name,
                 email,
-                username,
+                phone,
                 password: hashedPassword,
                 role:role,
+                profilePic:imagePaths
             });
             const savedUser = await newUser.save();
             console.log('Saved User:', savedUser);
-    
+        
             if (newUser) {
                 generateTokenAndSetCookie(newUser._id, res);
     
@@ -62,7 +73,7 @@ const loginAdmin = async (req, res) =>{
                     _id: newUser._id,
                     name: newUser.name,
                     email: newUser.email,
-                    username: newUser.username,
+                    phone: newUser.phone,
                     bio: newUser.bio,
                     profilePic: newUser.profilePic,
                     role: newUser.role,
@@ -79,57 +90,50 @@ const loginAdmin = async (req, res) =>{
 
  const updateUser = async (req, res) => {
     try {
-        const userId = req.params.userId; // Extract user ID from request parameters
-        const { name, username, role } = req.body; // Extract updated user details from request body
+        const userId = req.params.userId; 
+        const { name, phone, role } = req.body; 
+        console.log(req.user._id,"hja++++++%T#$64565");
 
-        // Find the user by ID
         let user = await User.findById(userId);
 
-        // If user does not exist, return a 404 error
+       
         if (!user) {
             return res.status(404).json({ error: "User not found" });
         }
 
+   
+        const newImagePaths = [];
+
+        // Check if new profile pictures are uploaded
+        if (req.files && req.files.length > 0) {
+            // Delete existing profile pictures
+            if (user.profilePic && user.profilePic.length > 0) {
+                for (const imagePath of user.profilePic) {
+                    fs.unlinkSync(path.join(__dirname, "../public/images", imagePath));
+                }
+            }
+
+            for (const image of req.files) {
+                newImagePaths.push(image.filename);
+            }
+        }
+
         // Update the user's details
         user.name = name;
-        user.username = username;
+        user.phone = phone;
         user.role = role;
+        user.profilePic = newImagePaths.concat(user.profilePic || []);
 
-        // Save the updated user object
+       
         const updatedUser = await user.save();
 
-        // Return the updated user details in the response
-        res.status(200).json({message:"User update successfully ",updatedUser});
+        
+        res.status(200).json({ message: "User updated successfully", updatedUser });
     } catch (error) {
         console.error("Error updating user:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 };
-
-
-//  const setRoles = async(req,res)=>{
-//     try {
-//         const { userIds, role } = req.body;
-//         // const admin = req.user; // Assuming user information is stored in req.user
-
-//         // // Validate if user is an admin
-//         // if (!admin || admin.role !== 'admin') {
-//         //     return res.status(401).json({ error: "Unauthorized" });
-//         // }
-
-//         // Update roles for the specified user IDs
-//         const result = await User.updateMany(
-//             { _id: { $in: userIds } }, // Match users by their IDs
-//             { role } // Set the new role
-//         );
-
-//         console.log(`${result.nModified} users updated`);
-
-//         res.status(200).json({ message: `${result.nModified} users updated` });
-//     } catch (error) {
-//         res.status(400).json({ error: "Internal Server Error" });
-//     }
-//  }
 
  const getUser = async (req, res) => {
     try {
@@ -143,7 +147,22 @@ const loginAdmin = async (req, res) =>{
         res.status(500).json({ error: "Internal Server Error" });
     }
 };
+const deleteUser = async(req,res)=>{
+    const userId = req.params.userId;
+    console.log(userId)
+    try {
+        const user = User.findById(userId);
+        if(!user){
+            return res.status(404).json({ error: "User not found" });  
+        }
+        await User.findByIdAndDelete(userId)
+        res.status(200).json({ message: 'User deleted successfully' });
 
+    } catch (error) {
+        console.error("Error getting users:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+}
 
 const dashboard = async(req,res)=>{
     try {
@@ -165,6 +184,7 @@ const logoutUser = async (req,res)=>{
 	try {
 		res.cookie("jwt","",{maxAge:1});
 		res.status(200).json({message:"User logged out"});
+        console.log("log out successfully ")
 
 	}catch(error){
 		res.status(500).json({ error: error.message });
@@ -177,6 +197,7 @@ module.exports = {
     loginAdmin,
     createUser,
     logoutUser,
+    deleteUser,
     getUser,
     updateUser,
 }

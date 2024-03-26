@@ -2,6 +2,7 @@
  const dotenv = require("dotenv")
  const app = express();
  const cookieParser = require("cookie-parser")
+ const path = require('path');
  const adminRouter = require('./routes/adminRoutes.js')
 const productRouter = require("./routes/productRoutes.js")
  const db = require('./database/connectDB.js');
@@ -19,6 +20,7 @@ const productRouter = require("./routes/productRoutes.js")
 app.use(express.urlencoded({extended:true})); // To parse from data in the req.body
 app.use(cookieParser());
 app.use(bodyParser.json());
+app.use( express.static(path.join(__dirname, 'public')));
 
  const PORT  = process.env.PORT || 5000 ; 
  

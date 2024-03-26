@@ -16,7 +16,7 @@ function App() {
         <Routes>
           <Route path="/" element={!user ? <AuthPage /> : <Navigate to="/dashboard" />} />
           <Route path="/dashboard" element={user ? <DashboardPage /> : <Navigate to="/" />} />
-          <Route path="/users" element= {<UsersListPage/>} />
+          <Route path="/users" element= {user ?<UsersListPage/> : <Navigate to="/" />} />
         </Routes>
     </Box>
      

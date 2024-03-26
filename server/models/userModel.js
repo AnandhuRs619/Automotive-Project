@@ -6,10 +6,9 @@ const userSchema = mongoose.Schema(
 			type: String,
 			required: true,
 		},
-		username: {
+		phone: {
 			type: String,
 			required: true,
-			unique: true,
 		},
 		email: {
 			type: String,
@@ -23,11 +22,10 @@ const userSchema = mongoose.Schema(
 		},
         role: {
 			type: String,
-			enum: ['admin', 'user'], // Define possible roles
 			default: 'user' // Default role for new users
 		  },
 		profilePic: {
-			type: String,
+			type: [String],
 			default: "",
 		},
         isBlock: {

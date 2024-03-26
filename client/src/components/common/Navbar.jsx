@@ -1,9 +1,15 @@
 import { Flex, Input, InputGroup, InputLeftElement, IconButton, Avatar, Menu, MenuButton, MenuItem, MenuList, MenuDivider, Text } from "@chakra-ui/react";
 import { SearchIcon, SettingsIcon } from "@chakra-ui/icons";
-
-// import { Link } from "react-router-dom";
+import { useRecoilValue } from "recoil";
+import userAtom from "../../atoms/userAtom";
+import useLogout from "../../hooks/useLogout"; 
 
 export  function Navbar() {
+  const user = useRecoilValue(userAtom)
+  const logout = useLogout();
+  const handleLogout = async () => {
+    logout(); // Call the logout function when the logout button is clicked
+  };
   return (
     <Flex
       m={5}
@@ -33,7 +39,7 @@ export  function Navbar() {
       {/* Avatar icon and settings on the right */}
       <Flex gap={3} align="center">
         {/* Avatar */}
-        <Avatar size="md" name="User" />
+        <Avatar size="md" src={`http://localhost:5000/images/${user.profilePic[0]}`} name={user.name} />
         
         {/* Settings */}
         <Menu>
@@ -51,7 +57,7 @@ export  function Navbar() {
             <MenuItem>Profile</MenuItem>
             <MenuItem>Settings</MenuItem>
             <MenuDivider />
-            <MenuItem>Logout</MenuItem>
+            <MenuItem onClick={handleLogout}>Logout</MenuItem>
           </MenuList>
         </Menu>
       </Flex>

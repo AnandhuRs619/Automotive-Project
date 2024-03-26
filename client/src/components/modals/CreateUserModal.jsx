@@ -26,12 +26,20 @@ export const CreateUserModal = ({ isOpen, onClose }) => {
 
   const handleSubmit = async () => {
     try {
-        console.log(formData);
         const dataToSend = new FormData();
-        dataToSend.append('profilePic', profilePic);
-        for (const [key, value] of formData.entries()) {
-            dataToSend.append(key, value);
+    
+        // Append profile picture if selected
+        if (profilePic) {
+          dataToSend.append('profilePic', profilePic);
         }
+    
+        // Append other form data fields
+        dataToSend.append('name', formData.name);
+        dataToSend.append('role', formData.role);
+        dataToSend.append('email', formData.email);
+        dataToSend.append('phone', formData.phone);
+        dataToSend.append('password', formData.password);
+    
         console.log(dataToSend);
       const res = await fetch('/api/admin/createUser', {
         method: 'POST',
@@ -44,6 +52,7 @@ export const CreateUserModal = ({ isOpen, onClose }) => {
       }
       showToast("Success", "Profile updated successfully", "success");
       onClose();
+      window.location.reload()
     } catch (error) {
       console.error('Error creating user:', error);
     }
