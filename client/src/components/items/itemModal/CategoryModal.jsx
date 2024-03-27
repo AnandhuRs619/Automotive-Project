@@ -1,114 +1,102 @@
 import { useState } from "react";
-import {
-  Table,
-  Tbody,
-  Td,
-  Text,
-  Th,
-  Thead,
-  Tr,
-  Spinner,
-  VStack,
-  Button,
-  Box,
-  AlertDialog,
-  AlertDialogOverlay,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogBody,
-  AlertDialogFooter,
-  useDisclosure,
-} from "@chakra-ui/react";
-import { EditIcon, DeleteIcon } from "@chakra-ui/icons"; 
+import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton, Button, Table, Tbody, Td, Th, Thead, Spinner, Stack, useDisclosure, Tr } from "@chakra-ui/react";
+import { EditIcon, AddIcon } from "@chakra-ui/icons";
 import { useFetchCategories } from "../../../hooks/useGetCategory";
-
+import { AddCategoryModal } from "./AddCategoryModal";
+import { EditCategoryModal } from "./EditCategoryModal";
+import useShowToast from "../../../hooks/useShowToast";
+import { useRecoilValue } from "recoil";
+import userAtom from "../../../atoms/userAtom";
 
 
 export const CategoryModal = () => {
-    const { isOpen: isDeleteAlertOpen, onOpen: openDeleteAlert, onClose: closeDeleteAlert } = useDisclosure();
-    const [selectedCategory, setSelectedCategory] = useState(null);
-    const { categories, loading } = useFetchCategories();
-  
-   
-  
-    // const handleEdit = (category) => {
-    //   // Handle edit action
-    // };
-  
-    const handleDelete = (category) => {
-      setSelectedCategory(category);
-      openDeleteAlert();
-    };
-  
-    const handleCloseDeleteAlert = () => {
-      setSelectedCategory(null);
-      closeDeleteAlert();
-    };
-  
-    const handleConfirmDelete = async () => {
-      try {
-        // Perform delete action here using selectedCategory.id
-        // Implement delete logic
-        closeDeleteAlert();
-      } catch (error) {
-        console.error("Error deleting category:", error);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const { categories, loading } = useFetchCategories();
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const loginUser = useRecoilValue(userAtom);
+  const showToast = useShowToast()
+
+  const handleEdit = (category) => {
+    if (loginUser.role !== "admin" && loginUser.role !== "manager") {
+        showToast("Error", "Only admin and manager can perform this action", "error");
+        return;
       }
-    };
-  
-    return (
-      <VStack spacing={4} align="stretch">
-        <Button colorScheme="blue" onClick={() => console.log("Add new category clicked")}>Add New Category</Button>
-        <Box>
-          <Text p={4} color="black" fontSize="xl" fontWeight="bold">
-            Category List
-          </Text>
-          {loading ? (
-            <Spinner size="lg" color="blue.500" />
-          ) : (
-            <Table variant="simple" overflowX="auto">
-              <Thead>
-                <Tr>
-                  <Th>Category Name</Th>
-                  <Th>Date Entered</Th>
-                  <Th>Action</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {categories.map((category) => (
-                  <Tr color="black" key={category.id}>
-                    <Td>{category.name}</Td>
-                    <Td>{category.dateEntered}</Td>
-                    <Td>
-                      <Button leftIcon={<EditIcon />} colorScheme="blue" variant="outline" size="sm" 
-                    //   onClick={() => handleEdit(category)}
-                      >
-                        Edit
-                      </Button>
-                      <Button leftIcon={<DeleteIcon />} colorScheme="red" variant="outline" size="sm" ml={2} onClick={() => handleDelete(category)}>
-                        Delete
-                      </Button>
-                    </Td>
-                  </Tr>
-                ))}
-              </Tbody>
-            </Table>
-          )}
-        </Box>
-        {/* Delete Category Confirmation Alert */}
-        <AlertDialog isOpen={isDeleteAlertOpen} onClose={closeDeleteAlert}>
-          <AlertDialogOverlay>
-            <AlertDialogContent>
-              <AlertDialogHeader>Delete Category</AlertDialogHeader>
-              <AlertDialogBody>
-                Are you sure you want to delete {selectedCategory && selectedCategory.name}?
-              </AlertDialogBody>
-              <AlertDialogFooter>
-                <Button colorScheme="red" onClick={handleConfirmDelete}>Delete</Button>
-                <Button onClick={handleCloseDeleteAlert}>Cancel</Button>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialogOverlay>
-        </AlertDialog>
-      </VStack>
-    );
+    setSelectedCategory(category);
+    setIsEditModalOpen(true);
   };
+
+  const handleAddCategory = () => {
+    if (loginUser.role !== "admin" && loginUser.role !== "manager") {
+        showToast("Error", "Only admin and manager can perform this action", "error");
+        return;
+      }
+    setIsAddModalOpen(true);
+  };
+
+  const handleAddModalClose = () => {
+    setIsAddModalOpen(false);
+  };
+
+  const handleEditModalClose = () => {
+    setIsEditModalOpen(false);
+    setSelectedCategory(null);
+  };
+
+  return (
+    <>
+      <Button size="md" colorScheme="blue" onClick={onOpen} minWidth="auto">
+        Show Category 
+      </Button>
+      <Modal isOpen={isOpen} onClose={onClose} size="xl">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Category List</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Stack spacing={4}>
+              <Button colorScheme="blue" leftIcon={<AddIcon />} onClick={handleAddCategory}>
+                Add New Category
+              </Button>
+              {loading ? (
+                <Spinner size="lg" color="blue.500" />
+              ) : (
+                <Table variant="simple" overflowX="auto">
+                  <Thead>
+                    <Tr>
+                      <Th>Category Name</Th>
+                      <Th>Date Entered</Th>
+                      <Th>Action</Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    {categories.map((category) => (
+                      <Tr color="black" key={category.id}>
+                        <Td>{category.category}</Td>
+                        <Td>{category.dateEntered}</Td>
+                        <Td>
+                          <Stack direction="row" spacing={2}>
+                            <Button leftIcon={<EditIcon />} colorScheme="blue" variant="outline" size="sm" onClick={() => handleEdit(category)}>
+                              Edit
+                            </Button>
+                          </Stack>
+                        </Td>
+                      </Tr>
+                    ))}
+                  </Tbody>
+                </Table>
+              )}
+            </Stack>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+      <AddCategoryModal isOpen={isAddModalOpen} onClose={handleAddModalClose} />
+      {selectedCategory && (
+        <EditCategoryModal isOpen={isEditModalOpen} onClose={handleEditModalClose} category={selectedCategory} />
+      )}
+    </>
+  );
+};
+
+export default CategoryModal;

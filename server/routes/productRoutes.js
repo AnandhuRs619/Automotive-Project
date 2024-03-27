@@ -5,6 +5,7 @@ const multer = require("../middleware/multer.js");
 
 productRouter.post("/additems",protectRoute,multer.array("images",1),productController.addProduct);
 productRouter.post('/addCategory',protectRoute,productController.addCategory);
+productRouter.put('/editCategory/:catagoryId',protectRoute,productController.editCategory);
 productRouter.get("/getitems",protectRoute,productController.getProduct);
 productRouter.get("/getcategory",protectRoute,productController.getCategory);
 productRouter.delete("/deleteItems/:productId",protectRoute,productController.deleteProduct);

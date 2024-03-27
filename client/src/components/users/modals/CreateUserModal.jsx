@@ -81,7 +81,7 @@ export const CreateUserModal = ({ isOpen, onClose }) => {
             <Select name="role" value={formData.role} onChange={handleInputChange} placeholder="Select role">
               <option value="admin">Admin</option>
               <option value="manager">Manager</option>
-              <option value="user">Employee</option>
+              <option value="user">User</option>
             </Select>
           </FormControl>
           <FormControl>

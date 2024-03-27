@@ -94,7 +94,7 @@ export const EditItemModal = ({ isOpen, onClose, item }) => {
                             <FormLabel>Category</FormLabel>
                             <Select name="category" value={editedItem.category} onChange={handleInputChange} placeholder="Select category">
                                 {categories.map((category) => (
-                                    <option key={category._id} value={category._id}>{category.category}</option>
+                                    <option key={category._id} value={category.category}>{category.category}</option>
                                 ))}
                             </Select>
                         </FormControl>

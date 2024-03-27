@@ -147,9 +147,39 @@ const addProduct = async (req, res) => {
       console.log("New product is added:", Category);
       res.status(201).json({ message: "Category added successfully" });
     } catch (error) {
-        
+      console.error("Error adding product:", error);
+      res.status(500).json({ error: "Internal Server Error" });
     }
   }
+  
+  const editCategory = async (req, res) => {
+    try {
+      const categoryId = req.params.catagoryId;
+      const { category, enteredBy } = req.body;
+  
+      if (!categoryId) {
+        return res.status(400).json({ error: "Category ID is required" });
+      }
+  
+      
+      const existingCategory = await categoryModel.findById(categoryId);
+      if (!existingCategory) {
+        return res.status(404).json({ error: "Category not found" });
+      }
+  
+      existingCategory.category = category;
+      existingCategory.enteredBy = enteredBy;
+  
+      
+      await existingCategory.save();
+  
+      res.status(200).json({ message: "Category updated successfully", category: existingCategory });
+    } catch (error) {
+      console.error("Error editing category:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  };
+  
 const getCategory = async(req,res)=>{
   try {
     const categoryData = await categoryModel.find();
@@ -168,5 +198,6 @@ const getCategory = async(req,res)=>{
     updateProduct,
     deleteProduct,
     getCategory,
+    editCategory
   }
   

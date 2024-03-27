@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState} from "react";
 import {
   Table,
   Tbody,
@@ -22,44 +22,29 @@ import {
   CardHeader,
   CardBody,
   CardFooter,
+  Flex,
 } from "@chakra-ui/react";
 import useShowToast from "../../hooks/useShowToast";
 import { AddItems } from "./AddItems";
 import { useRecoilValue } from "recoil";
 import userAtom from "../../atoms/userAtom";
 import { EditItemModal } from "./itemModal/EditItemsModal";
+import { CategoryModal } from "./itemModal/CategoryModal";
+import { useFetchItems } from "../../hooks/useGetProduct";
+
 
 export const ItemTable = () => {
   const { isOpen: isDeleteAlertOpen, onOpen: openDeleteAlert, onClose: closeDeleteAlert } = useDisclosure();
-  const [loading, setLoading] = useState(false);
-  const [itemData, setItemData] = useState([]);
+ 
   const loginUser = useRecoilValue(userAtom);
   const [selectedItem, setSelectedItem] = useState(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const showToast = useShowToast();
+const {loading,itemData,setItemData}= useFetchItems()
 
-  useEffect(() => {
-    const getItems = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch("/api/items/getitems");
-        if (!response.ok) {
-          throw new Error("Failed to fetch data");
-        }
-        const data = await response.json();
-        setItemData(data);
-      } catch (error) {
-        console.error("Error fetching items:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    getItems();
-  }, []);
-  
 const handleEdit = (item) =>{
-    if (loginUser.role !== "admin") {
-        showToast("Error", "Only admin users can perform this action", "error");
+    if (loginUser.role !== "admin" && loginUser.role !== "manager") {
+        showToast("Error", "Only admin and manager  can perform this action", "error");
         return;
       }
       setSelectedItem(item)
@@ -72,8 +57,8 @@ const handleCloseEditModal = () => {
 }
 
   const handleDelete = (itemId) => {
-    if (loginUser.role !== "admin") {
-      showToast("Error", "Only admin users can perform this action", "error");
+    if (loginUser.role !== "admin" && loginUser.role !== "manager") {
+      showToast("Error", "Only admin and manager can perform this action", "error");
       return;
     }
     setSelectedItem(itemId);
@@ -101,8 +86,12 @@ const handleCloseEditModal = () => {
 
   return (
     <VStack w="100%" spacing={4} align="stretch">
-      
-      <AddItems />
+     <Flex gap={2} justifyContent="flex-end">
+     { (loginUser.role === "admin" || loginUser.role === "manager") && <AddItems /> }
+{ (loginUser.role === "admin" || loginUser.role === "manager") && <CategoryModal /> }
+        
+        
+      </Flex>
       <Box>
         <Card m={'10'} borderRadius={"5"} bgColor={"whitesmoke"}>
           <CardHeader color="black" fontSize={{ base: "lg", md: "xl" }} fontWeight="bold">Inventory Items</CardHeader>
