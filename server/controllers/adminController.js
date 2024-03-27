@@ -92,7 +92,7 @@ const loginAdmin = async (req, res) =>{
     try {
         const userId = req.params.userId; 
         const { name, phone, role } = req.body; 
-        console.log(req.user._id,"hja++++++%T#$64565");
+        
 
         let user = await User.findById(userId);
 

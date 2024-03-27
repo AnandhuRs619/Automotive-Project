@@ -1,12 +1,13 @@
 const productRouter = require("express").Router();
 const productController = require("../controllers/productController.js");
 const protectRoute = require("../middleware/protectRoute.js");
+const multer = require("../middleware/multer.js");
 
-
-productRouter.post("/additems",protectRoute,productController.addProduct);
+productRouter.post("/additems",protectRoute,multer.array("images",1),productController.addProduct);
 productRouter.post('/addCategory',protectRoute,productController.addCategory);
 productRouter.get("/getitems",protectRoute,productController.getProduct);
+productRouter.get("/getcategory",protectRoute,productController.getCategory);
 productRouter.delete("/deleteItems/:productId",protectRoute,productController.deleteProduct);
-productRouter.post("/updateItems/:productId",protectRoute,productController.updateProduct);
+productRouter.put("/updateItems/:productId",protectRoute,multer.array("images",1),productController.updateProduct);
 
 module.exports = productRouter;

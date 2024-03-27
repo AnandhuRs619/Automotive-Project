@@ -27,6 +27,7 @@ import useShowToast from "../../hooks/useShowToast";
 import { AddItems } from "./AddItems";
 import { useRecoilValue } from "recoil";
 import userAtom from "../../atoms/userAtom";
+import { EditItemModal } from "./itemModal/EditItemsModal";
 
 export const ItemTable = () => {
   const { isOpen: isDeleteAlertOpen, onOpen: openDeleteAlert, onClose: closeDeleteAlert } = useDisclosure();
@@ -34,6 +35,7 @@ export const ItemTable = () => {
   const [itemData, setItemData] = useState([]);
   const loginUser = useRecoilValue(userAtom);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
   const showToast = useShowToast();
 
   useEffect(() => {
@@ -54,6 +56,20 @@ export const ItemTable = () => {
     };
     getItems();
   }, []);
+  
+const handleEdit = (item) =>{
+    if (loginUser.role !== "admin") {
+        showToast("Error", "Only admin users can perform this action", "error");
+        return;
+      }
+      setSelectedItem(item)
+      setEditModalOpen(true)
+
+}
+const handleCloseEditModal = () => {
+    setEditModalOpen(false)
+    setSelectedItem(null)
+}
 
   const handleDelete = (itemId) => {
     if (loginUser.role !== "admin") {
@@ -112,8 +128,8 @@ export const ItemTable = () => {
                   {itemData.map((item) => (
                     <Tr color="black" key={item._id}>
                       <Td>
-                        {item.imagePaths ? (
-                          <Image src={item.imagePath} alt={item.name} boxSize="50px" />
+                        {item.imagePath ? (
+                          <Image src={`http://localhost:5000/images/${item.imagePath[0]}`} alt={item.name} boxSize="50px" />
                         ) : (
                           <Image
                             src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/2048px-No_image_available.svg.png"
@@ -135,7 +151,7 @@ export const ItemTable = () => {
                       <Td>{item.dateEntered}</Td>
                       <Td>
                         <>
-                          <Button colorScheme="blue" size="sm">
+                          <Button colorScheme="blue" size="sm" onClick={()=> handleEdit(item)}>
                             Edit
                           </Button>
                           <Button colorScheme="red" size="sm" ml={2} onClick={() => handleDelete(item._id)}>
@@ -152,6 +168,7 @@ export const ItemTable = () => {
           <CardFooter />
         </Card>
       </Box>
+        {editModalOpen && selectedItem &&<EditItemModal isOpen={editModalOpen} onClose={handleCloseEditModal} item={selectedItem}/>}
       <AlertDialog isOpen={isDeleteAlertOpen} onClose={closeDeleteAlert}>
         <AlertDialogOverlay>
           <AlertDialogContent>

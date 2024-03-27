@@ -8,7 +8,7 @@ const addProduct = async (req, res) => {
       const { name, quantity, price, category, description,enteredBy } =req.body;
         console.log(req.body)
         const user = await User.findById(enteredBy);   
-      
+      console.log(user)
         if (!user) {
             return res.status(400).json({ error: "User not found" });
         }
@@ -18,13 +18,13 @@ const addProduct = async (req, res) => {
       }
   
       
-    //   const images = req.files;
-    //   console.log(images);
-    //   const imagePaths = [];
+      const images = req.files;
+      console.log(images);
+      const imagePaths = [];
   
-    //   for (const image of images) {
-    //     imagePaths.push(image.filename);
-    //   }
+      for (const image of images) {
+        imagePaths.push(image.filename);
+      }
   
       const Product = new productModel({
         name,
@@ -32,7 +32,7 @@ const addProduct = async (req, res) => {
         price,
         category,
         description,
-        // imagePath: imagePaths,
+        imagePath: imagePaths,
         enteredBy:enteredBy,
       });
   
@@ -62,21 +62,34 @@ const addProduct = async (req, res) => {
   const updateProduct = async (req, res) => {
     try {
         const productId = req.params.productId;
-        const { name, quantity, price, category, description,enteredBy } =req.body;
-        
-          //   const images = req.files;
-    //   console.log(images);
-    //   const imagePaths = [];
+        const { name, quantity, price, category, description, enteredBy } = req.body;
+        const images = req.files;
+      
+        const imagePaths = [];
   
-    //   for (const image of images) {
-    //     imagePaths.push(image.filename);
-    //   }
+        for (const image of images) {
+            imagePaths.push(image.filename);
+        }
 
-        // Find the product by ID and update its fields
         const updatedProduct = await productModel.findByIdAndUpdate(
             productId,
-            {name, quantity, price, category, description,enteredBy },
-            { new: true } // Return the updated document
+            {
+                $set: {
+                    name,
+                    quantity,
+                    price,
+                    category,
+                    description,
+                    enteredBy
+                },
+                $push: {
+                    images: {
+                        $each: [imagePaths[0]],
+                        $position: 0 
+                    }
+                }
+            },
+            { new: true } 
         );
 
         if (!updatedProduct) {
@@ -90,6 +103,7 @@ const addProduct = async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 };
+
 
 
   const deleteProduct = async (req, res) => {
@@ -136,7 +150,16 @@ const addProduct = async (req, res) => {
         
     }
   }
-
+const getCategory = async(req,res)=>{
+  try {
+    const categoryData = await categoryModel.find();
+    res.status(200).json( categoryData );
+    console.log(categoryData)
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  
+  }
+}
 
   module.exports = {
     addProduct,
@@ -144,5 +167,6 @@ const addProduct = async (req, res) => {
     addCategory,
     updateProduct,
     deleteProduct,
+    getCategory,
   }
   
