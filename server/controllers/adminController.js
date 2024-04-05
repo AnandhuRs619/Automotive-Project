@@ -1,4 +1,3 @@
-const Admin = require("../models/adminModel.js")
 const { find } = require("../models/categoryModel.js")
 const User = require("../models/userModel.js")
  const generateTokenAndSetCookie = require("../utils/helper/generateToken.js")
