@@ -9,7 +9,7 @@ export default defineConfig({
     // get avoild the CORS error 
     proxy:{
       "/api":{
-        target:"https://automotive-project-server.vercel.app/",
+        target:"https://automotive-project-server.onrender.com/",
         changeOrigin:true,
         secure:false,
       }
