@@ -5,11 +5,11 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server:{
-    
+    port:3000,
     // get avoild the CORS error 
     proxy:{
       "/api":{
-        target:"https://automotive-project-server.onrender.com",
+        target:"https://automotive-project-server.onrender.com/",
         changeOrigin:true,
         secure:false,
       }

@@ -10,7 +10,7 @@ const productRouter = require("./routes/productRoutes.js")
  const cors = require('cors');
 
 
- db();
+ db();A
 
  dotenv.config();
 
@@ -23,7 +23,10 @@ app.use(bodyParser.json());
 app.use( express.static(path.join(__dirname, 'public')));
 
  const PORT  = process.env.PORT || 5000 ; 
- 
+ app.use(express.static("../client/dist/assets"));
+ app.get("*",(req,res)=>{
+    res.sendFile(path.resolve(__dirname ,"client","dist","assests","index.html"))
+ })
 // Routes
  app.use('/api/admin',adminRouter)
  app.use("/api/items",productRouter)
